@@ -1,0 +1,36 @@
+name: Build Customers
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        customer: [c1, c2, c3]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Customer ${{ matrix.customer }}
+      run: npm run build -- --configuration=${{ matrix.customer }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: customer-${{ matrix.customer }}-build
+        path: dist/angular-app/
+        retention-days: 5
